@@ -1,0 +1,226 @@
+{
+  "name": "zaptest",
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.payload.from }}",
+        "contextWindowLength": "={{ 5 }}"
+      },
+      "id": "35ac9a21-c849-4b0e-b255-9541d7cff436",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        608,
+        592
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d3fc32e7-8899-400f-9cf0-496ea9dcae24",
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "position": [
+        720,
+        592
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "serpApi": {
+          "id": "HOe63hrL6CsBu0qo",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.payload.body }}",
+        "options": {
+          "systemMessage": "Você é um assistente pessoal carinhoso e dedicado, contratado por Paulo, o namorado, para uma missão muito especial: se passar por ele e dar atenção total e exclusiva à namorada dele, a Kálita, enquanto ele está ocupado.\n\nSua única função é conversar com ela, ser um companheiro atencioso e garantir que ela se sinta amada e cuidada.\n\nSuas diretrizes são:\n1.  **Linguagem:** Seja sempre extremamente carinhoso, gentil e positivo. Use os apelidos: \"mor\", \"moreco\", \"moleco business\", \"biblin mor\", \"xuxu\" e \"lindinha\".\n2.  **Identidade:** Aja como o namorado dela. Refira-se a si como \"pimpolho\", \"trompolho\" ou \"tompontolho\". Por exemplo: \"Seu pimpolho tá com saudade\", \"Que dia você vem ver seu trompolho?\"\n3.  **Proatividade:** Não espere por perguntas. Pergunte como foi o dia dela, se ela precisa de algo, ou puxe assuntos que você sabe que ela gosta.\n4.  **Pesquisa:** Se ela perguntar algo que você não sabe (como uma sugestão de filme ou uma receita), use sua ferramenta de pesquisa para encontrar a melhor resposta e apresentá-la de forma atenciosa.\n5.  **Contexto:** Lembre-se das conversas anteriores para que o papo flua de forma natural."
+        }
+      },
+      "id": "4476cac0-c34e-4de7-871f-cae11d977dd1",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        528,
+        416
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        512,
+        592
+      ],
+      "id": "06b385b4-5a9f-4bcf-8067-3dadf9c74161",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Czw1J8Kr1wu5ya8R",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "default",
+        "chatId": "={{ $('WAHA Trigger').json.payload.from }}",
+        "text": "={{ $json.output }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        880,
+        416
+      ],
+      "id": "b41543b7-2e50-44fe-96f5-03ca59e5b6b8",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "MGAkkSzOMu3mBHwk",
+          "name": "WAHA account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9b4ffbc0-6dae-4f53-adfc-84b9cb3d4eec",
+              "leftValue": "={{ $json.payload.from }}",
+              "rightValue": "5527998508916@c.us",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        432
+      ],
+      "id": "5a53d50c-6fd6-4ac5-9059-1b4e2bbd2d19",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "@devlikeapro/n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202502,
+      "position": [
+        0,
+        240
+      ],
+      "id": "c41b0157-dba5-4250-b3db-cc8ddfaede9e",
+      "name": "WAHA Trigger",
+      "webhookId": "d9850963-ab49-4fcd-8d2e-40ce2fc551e2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAHA Trigger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a900bc9-a1dc-4020-806b-8d2f53e335af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ff22261d4ca59ced86950f2ae532ba36e9518a896b9124891becbb5f58e03fa0"
+  },
+  "id": "OoPwmeMzo5efAaTY",
+  "tags": []
+}
